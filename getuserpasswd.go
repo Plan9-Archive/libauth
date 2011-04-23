@@ -11,6 +11,7 @@ func Getuserpasswd(params string, args ...interface{}) (string,os.Error) {
 	}
 	defer f.Close()
 
+retry0:
 	_,e  = f.Write([]byte(fmt.Sprintf("start "+params, args...)))
 	if e!=nil {
 		return "",e
@@ -19,10 +20,17 @@ func Getuserpasswd(params string, args ...interface{}) (string,os.Error) {
 	if e!=nil {
 		return "",e
 	}
-	if ret := string(buf[0:n]); ret!="ok" {
-		return "",os.NewError(ret)
+	s  := string(buf[0:n])
+	ss := tokenize(s)
+	switch ss[0] {
+	case "ok":
+	case "needkey":
+		getkey(s)
+		goto retry0
+	default:
+		return "",os.NewError(s)
 	}
-retry:
+retry1:
 	_,e  = f.Write([]byte("read"))
 	if e!=nil {
 		return "",e
@@ -31,12 +39,12 @@ retry:
 	if e!=nil {
 		return "",e
 	}
-	s  := string(buf[0:n])
-	ss := tokenize(s)
+	s   = string(buf[0:n])
+	ss  = tokenize(s)
 	switch ss[0] {
 	case "needkey":
 		getkey(s)
-		goto retry
+		goto retry1
 	case "ok":
 		return ss[2],nil
 	default:
