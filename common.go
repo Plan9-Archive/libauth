@@ -17,7 +17,7 @@ func tokenize(s string) []string {
 	tmp  := []byte{}
 	quot := false
 	for i:=0; i<len(s); i++ {
-		if s[i] == ' ' && !quot {
+		if (s[i] == ' ' || s[i]=='\t' || s[i]=='\n') && !quot {
 			ss = append(ss, string(tmp))
 			tmp= []byte{}
 			continue
