@@ -2,24 +2,24 @@ package libauth
 
 import "os"
 
-func getkey(params string) os.Error {
-	p,e := os.StartProcess(factotum, []string{"getkey","-g",params},
+func getkey(params string) error {
+	p, e := os.StartProcess(factotum, []string{"getkey", "-g", params},
 		&os.ProcAttr{Files: []*os.File{os.Stdin, os.Stdout, os.Stderr}})
 	if e != nil {
 		return e
 	}
-	_,e = p.Wait(0)
+	_, e = p.Wait()
 	return e
 }
 
 func tokenize(s string) []string {
-	ss   := []string{}
-	tmp  := []byte{}
+	ss := []string{}
+	tmp := []byte{}
 	quot := false
-	for i:=0; i<len(s); i++ {
-		if (s[i] == ' ' || s[i]=='\t' || s[i]=='\n') && !quot {
+	for i := 0; i < len(s); i++ {
+		if (s[i] == ' ' || s[i] == '\t' || s[i] == '\n') && !quot {
 			ss = append(ss, string(tmp))
-			tmp= []byte{}
+			tmp = []byte{}
 			continue
 		}
 		if s[i] != '\'' {
@@ -30,14 +30,14 @@ func tokenize(s string) []string {
 			quot = true
 			continue
 		}
-		if i+1==len(s) || s[i+1]!='\'' {
+		if i+1 == len(s) || s[i+1] != '\'' {
 			quot = false
 			continue
 		}
 		tmp = append(tmp, '\'')
 		i++
 	}
-	if len(tmp)>0 {
+	if len(tmp) > 0 {
 		ss = append(ss, string(tmp))
 	}
 	return ss

@@ -1,26 +1,26 @@
 package libauth
 
 import "fmt"
-import "os"
+import "errors"
 
-func Getuserpasswd(params string, args ...interface{}) (string,os.Error) {
+func Getuserpasswd(params string, args ...interface{}) (string, error) {
 	var buf [4096]byte
-	f,e := openRPC()
-	if e!=nil {
-		return "",e
+	f, e := openRPC()
+	if e != nil {
+		return "", e
 	}
 	defer f.Close()
 
 retry0:
-	_,e  = f.Write([]byte(fmt.Sprintf("start "+params, args...)))
-	if e!=nil {
-		return "",e
+	_, e = f.Write([]byte(fmt.Sprintf("start "+params, args...)))
+	if e != nil {
+		return "", e
 	}
-	n,e := f.Read(buf[:])
-	if e!=nil {
-		return "",e
+	n, e := f.Read(buf[:])
+	if e != nil {
+		return "", e
 	}
-	s  := string(buf[0:n])
+	s := string(buf[0:n])
 	ss := tokenize(s)
 	switch ss[0] {
 	case "ok":
@@ -28,29 +28,29 @@ retry0:
 		getkey(s)
 		goto retry0
 	default:
-		return "",os.NewError(s)
+		return "", errors.New(s)
 	}
 retry1:
-	_,e  = f.Write([]byte("read"))
-	if e!=nil {
-		return "",e
+	_, e = f.Write([]byte("read"))
+	if e != nil {
+		return "", e
 	}
-	n,e  = f.Read(buf[:])
-	if e!=nil {
-		return "",e
+	n, e = f.Read(buf[:])
+	if e != nil {
+		return "", e
 	}
-	s   = string(buf[0:n])
-	ss  = tokenize(s)
+	s = string(buf[0:n])
+	ss = tokenize(s)
 	switch ss[0] {
 	case "needkey":
 		getkey(s)
 		goto retry1
 	case "ok":
-		return ss[2],nil
+		return ss[2], nil
 	default:
-		return "",os.NewError(s)
+		return "", errors.New(s)
 	}
 	println(s)
 
-	return "FIFI",nil
+	return "FIFI", nil
 }
