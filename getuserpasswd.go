@@ -2,6 +2,7 @@ package libauth
 
 import "fmt"
 import "errors"
+import "strings"
 
 func Getuserpasswd(params string, args ...interface{}) (string, error) {
 	var buf [4096]byte
@@ -25,7 +26,7 @@ retry0:
 	switch ss[0] {
 	case "ok":
 	case "needkey":
-		getkey(s)
+		getkey(strings.Join(ss[1:], " "))
 		goto retry0
 	default:
 		return "", errors.New(s)
@@ -43,7 +44,7 @@ retry1:
 	ss = tokenize(s)
 	switch ss[0] {
 	case "needkey":
-		getkey(s)
+		getkey(strings.Join(ss[1:], " "))
 		goto retry1
 	case "ok":
 		return ss[2], nil
