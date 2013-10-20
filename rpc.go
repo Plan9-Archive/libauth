@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"strconv"
-	"log"
 )
 
 type AuthRpc struct {
@@ -106,7 +105,6 @@ func (rpc *AuthRpc) Rpc(overb string, arg string) (AuthRet, string) {
 		return ARtoobig, "rpc too big"
 	}
 
-	log.Printf("Rpc write: %s %s", overb, arg)
 	if _, err := rpc.F.Write([]byte(overb + " " + arg)); err != nil {
 		return ARrpcfailure, "write: " + err.Error()
 	}
@@ -132,7 +130,6 @@ func (rpc *AuthRpc) Rpc(overb string, arg string) (AuthRet, string) {
 		return ARrpcfailure, "malformed rpc response: " + string(ibuf)
 	}
 
-	log.Printf("Rpc read: %s %s", iverb, rpc.Arg)
 	switch ar {
 	case ARok:
 		return ARok, ""
@@ -245,10 +242,9 @@ func RsaSign(sha1 []byte) (signed []byte, err error) {
 	if ar, str := rpc.Rpc("write", string(sha1)); ar != ARok {
 		return nil, errors.New("write: " + str)
 	}
-	if ar, str := rpc.Rpc("read", ""); ar != ARok || rpc.Arg == nil || len(rpc.Arg) <= 0{
+	if ar, str := rpc.Rpc("read", ""); ar != ARok || rpc.Arg == nil || len(rpc.Arg) <= 0 {
 		return nil, errors.New("read: " + str)
 	}
 
 	return rpc.Arg, nil
 }
-
