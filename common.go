@@ -1,6 +1,9 @@
 package libauth
 
-import "os"
+import (
+	"os"
+	"strings"
+)
 
 func getkey(params string) error {
 	p, e := os.StartProcess(factotum, []string{"getkey", "-g", params},
@@ -41,4 +44,21 @@ func tokenize(s string) []string {
 		ss = append(ss, string(tmp))
 	}
 	return ss
+}
+
+// given a string of the form 'proto=foo service=bar user=baz', tokenize it into a map.
+func attrmap(s string) map[string]string {
+	attrmap := make(map[string]string)
+
+	strs := tokenize(s)
+	for _, av := range strs {
+		a := strings.Split(av, "=")
+		if len(a) == 1 {
+			attrmap[a[0]] = ""
+		} else {
+			attrmap[a[0]] = a[1]
+		}
+	}
+
+	return attrmap
 }
