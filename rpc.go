@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"strconv"
 	"log"
+	"strconv"
 )
 
 type AuthRpc struct {
@@ -245,10 +245,9 @@ func RsaSign(sha1 []byte) (signed []byte, err error) {
 	if ar, str := rpc.Rpc("write", string(sha1)); ar != ARok {
 		return nil, errors.New("write: " + str)
 	}
-	if ar, str := rpc.Rpc("read", ""); ar != ARok || rpc.Arg == nil || len(rpc.Arg) <= 0{
+	if ar, str := rpc.Rpc("read", ""); ar != ARok || rpc.Arg == nil || len(rpc.Arg) <= 0 {
 		return nil, errors.New("read: " + str)
 	}
 
 	return rpc.Arg, nil
 }
-
