@@ -49,7 +49,6 @@ retry1:
 		return "", e
 	}
 	s = string(buf[0:n])
-	println(s)
 	ss = tokenize(s)
 	switch ss[0] {
 	case "needkey":
