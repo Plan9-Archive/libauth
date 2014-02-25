@@ -55,6 +55,9 @@ retry1:
 		getkey(strings.Join(ss[1:], " "))
 		goto retry1
 	case "ok":
+		if len(ss) < 2 {
+			return "", nil
+		}
 		return ss[2], nil
 	default:
 		return "", errors.New(s)
