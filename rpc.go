@@ -132,7 +132,7 @@ func (rpc *AuthRpc) Rpc(overb string, arg string) (AuthRet, string) {
 
 	switch ar {
 	case ARok:
-		return ARok, ""
+		return ARok, string(rpc.Arg)
 	case ARrpcfailure:
 		return ARrpcfailure, ""
 	case ARerror:
@@ -207,6 +207,10 @@ func fauth_proxy(rw io.ReadWriter, rpc *AuthRpc, params string) (*AuthInfo, erro
 	}
 
 	return nil, errors.New("fauth_proxy stub")
+}
+
+func OpenRPC() (io.ReadWriteCloser, error) {
+	return openRPC()
 }
 
 func Proxy(rw io.ReadWriter, format string, a ...interface{}) (*AuthInfo, error) {
