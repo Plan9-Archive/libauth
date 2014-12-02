@@ -1,14 +1,15 @@
 package libauth
 
 import (
+	"io"
 	"os"
 )
 
-func openRPC() (*os.File, error) {
+func openRPC() (io.ReadWriteCloser, error) {
 	return os.OpenFile("/mnt/factotum/rpc", os.O_RDWR, 0)
 }
 
-func openCtl() (*os.File, error) {
+func openCtl() (io.ReadWriteCloser, error) {
 	return os.OpenFile("/mnt/factotum/ctl", os.O_RDWR, 0)
 }
 
