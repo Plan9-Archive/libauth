@@ -1,7 +1,6 @@
 package libauth
 
 import (
-	//	"code.google.com/p/go.crypto/ssh"
 	"bufio"
 	"crypto/rsa"
 	"errors"
