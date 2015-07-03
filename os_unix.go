@@ -3,10 +3,11 @@
 package libauth
 
 import (
-	"code.google.com/p/goplan9/plan9"
-	"code.google.com/p/goplan9/plan9/client"
 	"io"
 	"os"
+
+	"9fans.net/go/plan9"
+	"9fans.net/go/plan9/client"
 )
 
 func openRPC() (io.ReadWriteCloser, error) {
