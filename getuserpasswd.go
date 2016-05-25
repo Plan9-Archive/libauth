@@ -57,7 +57,7 @@ retry1:
 		if len(ss) < 2 {
 			return "", nil
 		}
-		return ss[2], nil
+		return ss[1], nil
 	default:
 		return "", errors.New(s)
 	}
