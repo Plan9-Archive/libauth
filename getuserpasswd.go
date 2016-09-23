@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 	"errors"
 	"fmt"
+	"io"
 	"math/big"
 	"strconv"
 	"strings"
@@ -20,7 +21,8 @@ func Getuserpasswd(params string, args ...interface{}) (string, error) {
 	defer f.Close()
 
 retry0:
-	_, e = f.Write([]byte(fmt.Sprintf("start "+params, args...)))
+	cmd := fmt.Sprintf("start "+params, args...)
+	_, e = io.WriteString(f, cmd)
 	if e != nil {
 		return "", e
 	}
@@ -39,7 +41,8 @@ retry0:
 		return "", errors.New(s)
 	}
 retry1:
-	_, e = f.Write([]byte("read"))
+	cmd = "read"
+	_, e = io.WriteString(f, cmd)
 	if e != nil {
 		return "", e
 	}
@@ -54,10 +57,10 @@ retry1:
 		getkey(strings.Join(ss[1:], " "))
 		goto retry1
 	case "ok":
-		if len(ss) < 2 {
-			return "", nil
+		if len(ss) != 3 {
+			return "", fmt.Errorf("expected 3 fields in ok, got %d", len(ss))
 		}
-		return ss[1], nil
+		return ss[2], nil
 	default:
 		return "", errors.New(s)
 	}
