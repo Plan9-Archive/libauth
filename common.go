@@ -3,6 +3,7 @@ package libauth
 import (
 	"os"
 	"strings"
+	"unicode/utf8"
 )
 
 func getkey(params string) error {
@@ -15,34 +16,64 @@ func getkey(params string) error {
 	return e
 }
 
+var qsep = " \t\r\n"
+
+func qtoken(t, sep string) (tok, rest string) {
+	quoting := false
+
+	for len(t) > 0 {
+		r, width := utf8.DecodeRuneInString(t)
+		if !(quoting || !strings.ContainsRune(sep, r)) {
+			break
+		}
+
+		if r != '\'' {
+			tok += t[:width]
+			t = t[width:]
+			continue
+		}
+
+		/* r is a quote */
+		if !quoting {
+			quoting = true
+			t = t[width:]
+			continue
+		}
+
+		/* quoting and we're on a quote */
+		if len(t) > 1 && t[1] != '\'' {
+			quoting = false
+			t = t[width:]
+			continue
+		}
+
+		/* doubled quote; fold one quote into two */
+		t = t[width:]
+		_, width = utf8.DecodeRuneInString(t)
+		tok += t[:width]
+	}
+
+	return tok, t
+}
+
 func tokenize(s string) []string {
-	ss := []string{}
-	tmp := []byte{}
-	quot := false
-	for i := 0; i < len(s); i++ {
-		if (s[i] == ' ' || s[i] == '\t' || s[i] == '\n') && !quot {
-			ss = append(ss, string(tmp))
-			tmp = []byte{}
-			continue
+	var ss []string
+
+	for len(s) > 0 {
+		// skip ws
+		for {
+			r, width := utf8.DecodeRuneInString(s)
+			if !strings.ContainsRune(qsep, r) {
+				break
+			}
+			s = s[width:]
 		}
-		if s[i] != '\'' {
-			tmp = append(tmp, s[i])
-			continue
-		}
-		if !quot {
-			quot = true
-			continue
-		}
-		if i+1 == len(s) || s[i+1] != '\'' {
-			quot = false
-			continue
-		}
-		tmp = append(tmp, '\'')
-		i++
+
+		tok, rest := qtoken(s, qsep)
+		ss = append(ss, tok)
+		s = rest
 	}
-	if len(tmp) > 0 {
-		ss = append(ss, string(tmp))
-	}
+
 	return ss
 }
 
