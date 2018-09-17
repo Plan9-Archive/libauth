@@ -11,12 +11,16 @@ import (
 	"strings"
 )
 
+type UserPasswd struct {
+	User, Password string
+}
+
 // Get a password. params i.e. proto=pass service=ssh role=client server=%s user=%s
-func Getuserpasswd(params string, args ...interface{}) (string, error) {
+func Getuserpasswd(params string, args ...interface{}) (*UserPasswd, error) {
 	var buf [4096]byte
 	f, e := openRPC()
 	if e != nil {
-		return "", e
+		return nil, e
 	}
 	defer f.Close()
 
@@ -24,11 +28,11 @@ retry0:
 	cmd := fmt.Sprintf("start "+params, args...)
 	_, e = io.WriteString(f, cmd)
 	if e != nil {
-		return "", e
+		return nil, e
 	}
 	n, e := f.Read(buf[:])
 	if e != nil {
-		return "", e
+		return nil, e
 	}
 	s := string(buf[0:n])
 	ss := tokenize(s)
@@ -38,17 +42,17 @@ retry0:
 		getkey(strings.Join(ss[1:], " "))
 		goto retry0
 	default:
-		return "", errors.New(s)
+		return nil, errors.New(s)
 	}
 retry1:
 	cmd = "read"
 	_, e = io.WriteString(f, cmd)
 	if e != nil {
-		return "", e
+		return nil, e
 	}
 	n, e = f.Read(buf[:])
 	if e != nil {
-		return "", e
+		return nil, e
 	}
 	s = string(buf[0:n])
 	ss = tokenize(s)
@@ -58,14 +62,14 @@ retry1:
 		goto retry1
 	case "ok":
 		if len(ss) != 3 {
-			return "", fmt.Errorf("expected 3 fields in ok, got %d", len(ss))
+			return nil, fmt.Errorf("expected 3 fields in ok, got %d", len(ss))
 		}
-		return ss[2], nil
+		return &UserPasswd{ss[1], ss[2]}, nil
 	default:
-		return "", errors.New(s)
+		return nil, errors.New(s)
 	}
 
-	return "FIFI", nil
+	return nil, nil
 }
 
 // find our rsa public keys
